@@ -1,5 +1,50 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+  div(class='container')
+    div(class='row')
+      div(class='col-sm-3')
+        h2 Backlog
+      div(class='col-sm-3')
+        h2 Ready
+      div(class='col-sm-3')
+        h2 Working
+      div(class='col-sm-3')
+        h2 Done
+    div(class='row kanban')
+      ul(class='col-sm-3' data-state='backlog')
+        li(class='panel panel-default' data-id='1')
+          div(class='panel-heading')
+            h3(class='panel-title') Task 1
+          div(class='panel-body') yahoo
+        li(class='panel panel-default' data-id='2')
+          div(class='panel-heading')
+            h3(class='panel-title') Task 2
+          div(class='panel-body') yahoo
+      ul(class='col-sm-3' data-state='ready')
+        li(class='panel panel-default' data-id='3')
+          div(class='panel-heading')
+            h3(class='panel-title') Task 3
+          div(class='panel-body') yahoo
+        li(class='panel panel-default' data-id='4')
+          div(class='panel-heading')
+            h3(class='panel-title') Task 4
+          div(class='panel-body') yahoo
+      ul(class='col-sm-3' data-state='working')
+        li(class='panel panel-default' data-id='5')
+          div(class='panel-heading')
+            h3(class='panel-title') Task 5
+          div(class='panel-body') yahoo
+        li(class='panel panel-default' data-id='6')
+          div(class='panel-heading')
+            h3(class='panel-title') Task 6
+          div(class='panel-body') yahoo
+      ul(class='col-sm-3' data-state='done')
+        li(class='panel panel-default' data-id='7')
+          div(class='panel-heading')
+            h3(class='panel-title') Task 7
+          div(class='panel-body') yahoo
+        li(class='panel panel-default' data-id='8')
+          div(class='panel-heading')
+            h3(class='panel-title') Task 8
+          div(class='panel-body') yahoo

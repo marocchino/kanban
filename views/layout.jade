@@ -1,7 +1,15 @@
 doctype html
-html
+html(leng='ja')
   head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
     title= title
+    link(rel='stylesheet', href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
     block content
+    script(src="/bower_components/jquery/dist/jquery.min.js")
+    script(src="/bower_components/bootstrap/dist/js/bootstrap.min.js")
+    script(src="/bower_components/jquery-sortable/source/js/jquery-sortable-min.js")
+    script(src="/javascripts/kanban.js")
