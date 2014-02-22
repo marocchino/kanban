@@ -2,10 +2,10 @@
 /**
  * Module dependencies.
  */
-
+'use strict';
 var express = require('express');
 var routes = require('./routes');
-var user = require('./routes/user');
+var issue = require('./routes/issue');
 var http = require('http');
 var path = require('path');
 
@@ -25,14 +25,18 @@ app.use(require('less-middleware')({ src: path.join(__dirname, 'public') }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
-if ('development' == app.get('env')) {
+if ('development' === app.get('env')) {
   app.use(express.errorHandler());
 }
 
 app.get('/', routes.index);
-app.get('/users', user.list);
+app.get('/issues.json', issue.index);
+app.post('/issues.json', issue.create);
+app.get('/issues/:id.json', issue.show);
+app.put('/issues/:id.json', issue.update);
+app.delete('/issues/:id.json', issue.destroy);
 
-http.createServer(app).listen(app.get('port'), function(){
+http.createServer(app).listen(app.get('port'), function () {
   console.log('Express server listening on port ' + app.get('port'));
 });
 
