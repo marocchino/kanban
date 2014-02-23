@@ -18,8 +18,11 @@ block content
       ul(class='col-sm-3' ng-attr-data-status='{{ status }}' ng-model="issues" ng-repeat="status in [0, 1, 2, 3]" kanban-sortable)
         li(class='panel panel-default' ng-attr-data-id='{{ issue.id }}' ng-repeat="issue in issues" ng-show='showIssue(issue, status)')
           div(class='panel-heading')
-            h3(class='panel-title') {{issue.title}}
-          div(class='panel-body') yahoo
+            h3(class='panel-title')
+              button(class='btn btn-success btn-xs' data-toggle='modal' data-target='#editIssue' ng-click='editIssue(issue)')
+                i(class="glyphicon glyphicon-edit")
+                {{ " #" + issue.id }}
+          div(class='panel-body')  {{issue.title}}
     div(class='modal fade' id='newIssue' tabindex='-1' role='dialog' aria-labelledby='newIssueLabel' aria-hidden='true')
       div(class='modal-dialog')
         div(class='modal-content')
@@ -27,7 +30,18 @@ block content
             button(type='button' class='close' data-dismiss='modal' aria-hidden='true') &times;
             h4(class='modal-title') Create New Issue
           div(class='modal-body')
-            input(type='text' class='form-control' placeholder='Type here.' ng-model="newIssue")
+            input(type='text' class='form-control' placeholder='Type here.' ng-model="newIssue.title")
           div(class='modal-footer')
             button(type='button' class='btn btn-default' data-dismiss='modal') Close
             button(type='button' class='btn btn-primary' data-dismiss='modal' ng-click='addIssue()') Save
+    div(class='modal fade' id='editIssue' tabindex='-1' role='dialog' aria-labelledby='editIssueLabel' aria-hidden='true')
+      div(class='modal-dialog')
+        div(class='modal-content')
+          div(class='modal-header')
+            button(type='button' class='close' data-dismiss='modal' aria-hidden='true') &times;
+            h4(class='modal-title') {{ "Edit Issue #" + currentIssue.id }}
+          div(class='modal-body')
+            input(type='text' class='form-control' placeholder='Type here.' ng-model="currentIssue.title")
+          div(class='modal-footer')
+            button(type='button' class='btn btn-default' data-dismiss='modal') Close
+            button(type='button' class='btn btn-primary' data-dismiss='modal' ng-click='updateIssue()') Save

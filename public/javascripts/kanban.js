@@ -6,17 +6,27 @@ kanbanApp.factory('Issues', ['$resource', function($resource) {
 }]);
 kanbanApp.controller('KanbanCtrl', ['$scope', 'Issues', function ($scope, Issues) {
   $scope.issues = Issues.query();
-  $scope.newIssue = "";
+  $scope.newIssue = new Issues({status: 0});
   $scope.addIssue = function () {
-    if (!!$scope.newIssue) {
+    if (!!$scope.newIssue.title) {
       var issues = $scope.issues;
-      var newIssue = new Issues({title: $scope.newIssue, status: 0});
-      newIssue.$save();
-      issues.push(newIssue);
-      $scope.newIssue = "";
+      $scope.newIssue.$save();
+      issues.push($scope.newIssue);
+      $scope.newIssue = new Issues({status: 0});
       $scope.issues = issues;
     }
   };
+
+  $scope.editIssue = function (issue) {
+    $scope.currentIssue = issue;
+  };
+
+  $scope.updateIssue = function () {
+    if (!!$scope.currentIssue.title) {
+      Issues.update({ id: $scope.currentIssue.id }, $scope.currentIssue);
+    }
+  };
+
   $scope.moveIssue = function (id, status) {
     var issues = [];
     for (var i in $scope.issues) {
