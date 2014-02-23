@@ -31,13 +31,13 @@ var issue = {
 
   create: function (req, res) {
     pool.getConnection(function (err, connection) {
-      var query = "INSERT INTO `kanban`.`issues` (`title`) VALUES (?);";
-      connection.query(query, req.params.title, function (err, result) {
+      var query = "INSERT INTO `kanban`.`issues` SET ?;";
+      connection.query(query, {title: req.body.title}, function (err, result) {
         if (err) {
           throw err;
         }
         connection.release();
-        res.json({state: 1, id: result.insertId});
+        res.json({status: 0, title: req.body.title, id: result.insertId});
       });
     });
   },
@@ -45,9 +45,13 @@ var issue = {
   update: function (req, res) {
     pool.getConnection(function (err, connection) {
       var query = "UPDATE `kanban`.`issues` " +
-        "SET `title` = ?, `status` = ?, `priority` = ? WHERE `id` = ?;";
-      var options = [req.params.title, req.params.status,
-        req.params.priority, req.params.id];
+        "SET ? WHERE `id` = ?;";
+      var attrs = {
+        title: req.body.title,
+        status: req.body.status,
+        id: req.params.id
+      };
+      var options = [attrs, req.params.id];
       connection.query(query, options, function (err, result) {
         if (err) {
           throw err;

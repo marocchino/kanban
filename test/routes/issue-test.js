@@ -73,7 +73,7 @@ describe('issue', function () {
 
 
     it('create issue', function() {
-      var mockReq = {params: { title: "yahoo" }};
+      var mockReq = {body: { title: "yahoo" }};
       var mockRes = {
         json: function(result) {
           expect(result.id).to.equal(1);
@@ -100,7 +100,10 @@ describe('issue', function () {
       });
 
       it('update issue', function() {
-        var mockReq = {params: { title: "yahoo2", status: 1, priority: 1, id: 1 }};
+        var mockReq = {
+          body: { title: "yahoo2", status: 1 },
+          params: { id: 1 }
+        };
         var mockRes = {
           json: function(result) {
             expect(result.state).to.equal(1);
