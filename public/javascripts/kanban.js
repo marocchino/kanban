@@ -9,11 +9,9 @@ kanbanApp.controller('KanbanCtrl', ['$scope', 'Issues', function ($scope, Issues
   $scope.newIssue = new Issues({status: 0});
   $scope.addIssue = function () {
     if (!!$scope.newIssue.title) {
-      var issues = $scope.issues;
       $scope.newIssue.$save();
-      issues.push($scope.newIssue);
+      $scope.issues.push($scope.newIssue);
       $scope.newIssue = new Issues({status: 0});
-      $scope.issues = issues;
     }
   };
 
@@ -28,17 +26,25 @@ kanbanApp.controller('KanbanCtrl', ['$scope', 'Issues', function ($scope, Issues
   };
 
   $scope.moveIssue = function (id, status) {
-    var issues = [];
     for (var i in $scope.issues) {
       var issue = $scope.issues[i];
       if (issue.id === id) {
         issue.status = status;
-        Issues.update({ id:id }, issue);
+        Issues.update({id: id}, issue);
+        break;
       }
-      issues.push(issue);
     }
-    $scope.issues = issues;
   };
+
+  $scope.deleteIssue = function (issue) {
+    Issues.delete({id: issue.id}, function() {
+      $scope.issues.forEach(function(currentIssue, index) {
+        if (currentIssue === issue) {
+          $scope.issues.splice(index, 1);
+        }
+      });
+    });
+  }
 
   $scope.showIssue = function (issue, status) {
     return issue.status == status;
