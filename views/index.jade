@@ -3,6 +3,9 @@ extends layout
 block content
   div(class='container')
     div(class='row')
+      div(class='col-sm-12')
+        button(class='btn btn-primary' data-toggle='modal' data-target='#newIssue') Create New Issue
+    div(class='row')
       div(class='col-sm-3')
         h2 Backlog
       div(class='col-sm-3')
@@ -15,36 +18,47 @@ block content
       ul(class='col-sm-3' data-state='backlog')
         li(class='panel panel-default' data-id='1')
           div(class='panel-heading')
-            h3(class='panel-title') Task 1
+            h3(class='panel-title') Issue 1
           div(class='panel-body') yahoo
         li(class='panel panel-default' data-id='2')
           div(class='panel-heading')
-            h3(class='panel-title') Task 2
+            h3(class='panel-title') Issue 2
           div(class='panel-body') yahoo
       ul(class='col-sm-3' data-state='ready')
         li(class='panel panel-default' data-id='3')
           div(class='panel-heading')
-            h3(class='panel-title') Task 3
+            h3(class='panel-title') Issue 3
           div(class='panel-body') yahoo
         li(class='panel panel-default' data-id='4')
           div(class='panel-heading')
-            h3(class='panel-title') Task 4
+            h3(class='panel-title') Issue 4
           div(class='panel-body') yahoo
       ul(class='col-sm-3' data-state='working')
         li(class='panel panel-default' data-id='5')
           div(class='panel-heading')
-            h3(class='panel-title') Task 5
+            h3(class='panel-title') Issue 5
           div(class='panel-body') yahoo
         li(class='panel panel-default' data-id='6')
           div(class='panel-heading')
-            h3(class='panel-title') Task 6
+            h3(class='panel-title') Issue 6
           div(class='panel-body') yahoo
       ul(class='col-sm-3' data-state='done')
         li(class='panel panel-default' data-id='7')
           div(class='panel-heading')
-            h3(class='panel-title') Task 7
+            h3(class='panel-title') Issue 7
           div(class='panel-body') yahoo
         li(class='panel panel-default' data-id='8')
           div(class='panel-heading')
-            h3(class='panel-title') Task 8
+            h3(class='panel-title') Issue 8
           div(class='panel-body') yahoo
+  div(class='modal fade' id='newIssue' tabindex='-1' role='dialog' aria-labelledby='newIssueLabel' aria-hidden='true')
+    div(class='modal-dialog')
+      div(class='modal-content')
+        div(class='modal-header')
+          button(type='button' class='close' data-dismiss='modal' aria-hidden='true') &times;
+          h4(class='modal-title') Create New Issue
+        div(class='modal-body')
+          input(type='text' class='form-control' placeholder='Type here.')
+        div(class='modal-footer')
+          button(type='button' class='btn btn-default' data-dismiss='modal') Close
+          button(type='button' class='btn btn-primary') Save
