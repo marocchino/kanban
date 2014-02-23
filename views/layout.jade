@@ -1,5 +1,5 @@
 doctype html
-html(leng='ja')
+html(leng='ja' ng-app='kanbanApp')
   head
     meta(charset='utf-8')
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
@@ -9,7 +9,9 @@ html(leng='ja')
     link(rel='stylesheet', href='/stylesheets/style.css')
   body
     block content
-    script(src="/bower_components/jquery/dist/jquery.min.js")
-    script(src="/bower_components/bootstrap/dist/js/bootstrap.min.js")
-    script(src="/bower_components/jquery-sortable/source/js/jquery-sortable-min.js")
-    script(src="/javascripts/kanban.js")
+    script(src='/bower_components/jquery/dist/jquery.min.js')
+    script(src='/bower_components/bootstrap/dist/js/bootstrap.min.js')
+    script(src='/bower_components/jquery-sortable/source/js/jquery-sortable-min.js')
+    script(src='/bower_components/angular/angular.min.js')
+    script(src='/bower_components/angular-resource/angular-resource.min.js')
+    script(src='/javascripts/kanban.js')
