@@ -1,3 +1,4 @@
+USE `kanban`;
 CREATE TABLE `issues` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `title` varchar(45) NOT NULL,
