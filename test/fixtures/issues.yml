@@ -1,0 +1,12 @@
+# Read about fixtures at
+# http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  title: One
+  priority: 3
+  status: 0
+
+two:
+  title: Two
+  priority: 4
+  status: 1
