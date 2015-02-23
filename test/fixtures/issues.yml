@@ -10,3 +10,8 @@ two:
   title: Two
   priority: 4
   status: 1
+
+three:
+  title: Three
+  priority: 5
+  status: 2
