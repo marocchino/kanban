@@ -1,3 +1,3 @@
 class IssueSerializer < ActiveModel::Serializer
-  attributes :title, :status, :priority
+  attributes :id, :title, :status, :priority
 end
