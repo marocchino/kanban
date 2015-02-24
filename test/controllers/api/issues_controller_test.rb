@@ -8,9 +8,9 @@ class Api::IssuesControllerTest < ActionController::TestCase
     assert_response :success
   end
 
-  def test_update_change_status
+  def test_move
     issue = issues(:one)
-    put :update, id: issue.id, issue: {status: "done"}
+    put :move, id: issue.id, issue: {status: "done"}
     issue.reload
     assert_equal issue.status, "done"
     assert_response :success

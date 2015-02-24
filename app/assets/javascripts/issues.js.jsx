@@ -20,16 +20,26 @@ var KanbanBox = React.createClass({
     });
   },
   reorderIssue: function(){
-    console.log("reorderIssue:");
-    console.log("  id: " + this.dragged.dataset.id);
-    console.log("  targetId: " + this.over.dataset.id);
-    console.log("  placement: " + this.nodePlacement);
-    this.getIssues();
+    $.ajax({
+      type: "POST",
+      url: '/api/issues/rotate',
+      data: {
+        _method:'PUT',
+        placement: placeholder.dataset.placement,
+        target:  this.over.dataset.priority,
+        current: this.dragged.dataset.priority,
+        status: this.targetList.dataset.status
+      },
+      dataType: 'json',
+      success: (function(msg) {
+        this.getIssues();
+      }).bind(this)
+    });
   },
   setStatusOfIssue: function() {
     $.ajax({
       type: "POST",
-      url: '/api/issues/' + this.dragged.dataset.id,
+      url: '/api/issues/' + this.dragged.dataset.id + '/move',
       data: {
         _method:'PUT',
         issue: { status: this.targetList.dataset.status }
@@ -61,8 +71,10 @@ var KanbanBox = React.createClass({
       this.setNodePlacement(e);
       this.targetList = this.over.parentNode;
       if(this.nodePlacement == "before") {
+        placeholder.dataset.placement = "before";
         this.targetList.insertBefore(placeholder, this.over.nextElementSibling);
       } else {
+        placeholder.dataset.placement = "after";
         this.targetList.insertBefore(placeholder, this.over);
       }
     } else if(e.target.tagName == "UL" &&
@@ -126,15 +138,18 @@ var IssueList = React.createClass({
     var statusFilter = function (issue) {
       return status == issue.status;
     };
-    var issueNodes = this.props.data.filter(statusFilter).map((function (issue) {
+    var issueNodes = this.props.data.filter(statusFilter).sort(function(a, b) {
+      return a.priority - b.priority;
+    }).map((function (issue) {
       return (
         <li data-id={issue.id}
+            data-priority={issue.priority}
             key={issue.id}
             draggable="true"
             onDragEnd={this._owner.dragEnd}
             onDragStart={this._owner.dragStart}
             className="panel callout radius">
-          {issue.title}
+            {issue.priority}. {issue.title}
         </li>
       );
     }).bind(this));
