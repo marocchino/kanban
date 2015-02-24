@@ -83,7 +83,7 @@ var KanbanBox = React.createClass({
     this.targetList.removeChild(placeholder);
 
     // Update state here
-    if (this.dragged.dataset.id == this.over.dataset.id) {
+    if (this.over && this.dragged.dataset.id == this.over.dataset.id) {
       this.dragged.style.display = "block";
     } else if (this.targetList != originList) {
       this.setStatusOfIssue();

@@ -5,7 +5,9 @@ class Api::IssuesController < ApplicationController
 
   def update
     @issue = Issue.find(params[:id])
-    if @issue.update(issue_params)
+    @issue.attributes = issue_params
+    @issue.set_next_priority
+    if @issue.save
       head :no_content
     else
       render json: @issue.errors, status: :unprocessable_entity

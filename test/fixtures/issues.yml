@@ -3,12 +3,12 @@
 
 one:
   title: One
-  priority: 3
+  priority: 5
   status: 0
 
 two:
   title: Two
-  priority: 4
+  priority: 5
   status: 1
 
 three:
