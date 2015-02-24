@@ -19,16 +19,26 @@ var KanbanBox = React.createClass({
       }.bind(this)
     });
   },
-  setStatusOfIssue: function() {
-    console.log("setStatusOfIssue:");
-    console.log("  id: " + this.dragged.dataset.id);
-    console.log("  status: " + this.over.parentNode.dataset.status);
-  },
   reorderIssue: function(){
     console.log("reorderIssue:");
     console.log("  id: " + this.dragged.dataset.id);
     console.log("  targetId: " + this.over.dataset.id);
     console.log("  placement: " + this.nodePlacement);
+    this.getIssues();
+  },
+  setStatusOfIssue: function() {
+    $.ajax({
+      type: "POST",
+      url: '/api/issues/' + this.dragged.dataset.id,
+      data: {
+        _method:'PUT',
+        issue: { status: this.over.parentNode.dataset.status }
+      },
+      dataType: 'json',
+      success: (function(msg) {
+        this.reorderIssue();
+      }).bind(this)
+    });
   },
   // utility
   setNodePlacement: function(e) {
@@ -63,8 +73,9 @@ var KanbanBox = React.createClass({
     // Update state here
     if (targetList != originList) {
       this.setStatusOfIssue();
+    } else {
+      this.reorderIssue();
     }
-    this.reorderIssue();
   },
   dragOver: function(e) {
     e.preventDefault();
