@@ -10,6 +10,17 @@ class IssueTest < ActiveSupport::TestCase
     assert issue.valid?
   end
 
+  def test_invalid_same_priority_in_same_category
+    one = issues(:one)
+    issue = Issue.new
+    issue.priority = one.priority
+    issue.status = one.status
+    assert !issue.valid?
+
+    issue.priority += 1
+    assert issue.valid?
+  end
+
   def test_todo_status
     assert issue.todo?
     assert_equal "todo", issue.status
