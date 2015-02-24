@@ -7,7 +7,11 @@ class Rotator
   end
 
   def array
-    current > target ? [*target..current] : [*current..target]
+    if @issues.blank?
+      range.to_a
+    else
+      @issues.map(&:priority)
+    end
   end
 
   def rotate
@@ -20,7 +24,21 @@ class Rotator
     end
   end
 
+  def issues(status=nil)
+    @issues ||= status.nil? ? [] : Issue.status(status).where(priority: range).order(priority: :asc).all
+  end
+
+  def save
+    @issues.zip(rotate).all? do |issue, priority|
+      issue.update_attribute(:priority, priority)
+    end
+  end
+
   private
+
+  def range
+    current > target ? target..current : current..target
+  end
 
   def full?
     (current > target) && placement == "before" ||
@@ -28,6 +46,6 @@ class Rotator
   end
 
   def rotate_number
-    (current > target) ? -1 : 1
+    (current > target) ? 1 : -1
   end
 end
