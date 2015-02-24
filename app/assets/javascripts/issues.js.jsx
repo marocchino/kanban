@@ -32,11 +32,15 @@ var KanbanBox = React.createClass({
       url: '/api/issues/' + this.dragged.dataset.id,
       data: {
         _method:'PUT',
-        issue: { status: this.over.parentNode.dataset.status }
+        issue: { status: this.targetList.dataset.status }
       },
       dataType: 'json',
       success: (function(msg) {
-        this.reorderIssue();
+        if(this.over) {
+          this.reorderIssue();
+        } else {
+          this.getIssues();
+        }
       }).bind(this)
     });
   },
@@ -50,12 +54,22 @@ var KanbanBox = React.createClass({
       this.nodePlacement = "before";
     }
   },
-  insertPlaceholder: function() {
-    var parent = this.over.parentNode;
-    if(this.nodePlacement == "before") {
-      parent.insertBefore(placeholder, this.over.nextElementSibling);
-    } else {
-      parent.insertBefore(placeholder, this.over);
+  insertPlaceholder: function(e) {
+    if(e.target.tagName == "LI" &&
+       !e.target.classList.contains("placeholder")) {
+      this.over = e.target;
+      this.setNodePlacement(e);
+      this.targetList = this.over.parentNode;
+      if(this.nodePlacement == "before") {
+        this.targetList.insertBefore(placeholder, this.over.nextElementSibling);
+      } else {
+        this.targetList.insertBefore(placeholder, this.over);
+      }
+    } else if(e.target.tagName == "UL" &&
+              e.target.childNodes.length == 0) {
+      this.over = null;
+      this.targetList = e.target;
+      e.target.appendChild(placeholder);
     }
   },
   // event
@@ -65,26 +79,23 @@ var KanbanBox = React.createClass({
     e.dataTransfer.setData("text/html", e.currentTarget);
   },
   dragEnd: function(e) {
-    this.dragged.style.display = "block";
-    var targetList = this.over.parentNode;
     var originList = this.dragged.parentNode;
-    targetList.removeChild(placeholder);
+    this.targetList.removeChild(placeholder);
 
     // Update state here
-    if (targetList != originList) {
+    if (this.dragged.dataset.id == this.over.dataset.id) {
+      this.dragged.style.display = "block";
+    } else if (this.targetList != originList) {
       this.setStatusOfIssue();
     } else {
       this.reorderIssue();
+      this.dragged.style.display = "block";
     }
   },
   dragOver: function(e) {
     e.preventDefault();
     this.dragged.style.display = "none";
-    if(e.target.tagName != "LI" ||
-       e.target.classList.contains("placeholder")) return;
-    this.over = e.target;
-    this.setNodePlacement(e);
-    this.insertPlaceholder();
+    this.insertPlaceholder(e);
   },
   componentDidMount: function() {
     this.getIssues();
