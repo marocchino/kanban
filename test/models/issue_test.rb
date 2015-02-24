@@ -6,8 +6,8 @@ class IssueTest < ActiveSupport::TestCase
     @issue ||= Issue.new
   end
 
-  def test_valid
-    assert issue.valid?
+  def test_create
+    assert Issue.create(title: "test")
   end
 
   def test_invalid_same_priority_in_same_category
