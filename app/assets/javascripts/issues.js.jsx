@@ -4,7 +4,7 @@ placeholder.innerText = "Drop here"
 
 var KanbanBox = React.createClass({
   getInitialState: function() {
-    return {data: []};
+    return {data: [], current: {}, target: {}};
   },
   // api call
   getIssues: function() {
@@ -25,88 +25,103 @@ var KanbanBox = React.createClass({
       url: '/api/issues/rotate',
       data: {
         _method:'PUT',
-        placement: placeholder.dataset.placement,
-        target:  this.over.dataset.priority,
-        current: this.dragged.dataset.priority,
-        status: this.targetList.dataset.status
+        placement: this.state.placement,
+        target:    this.state.target.priority,
+        current:   this.state.current.priority,
+        status:    this.state.target.status
       },
       dataType: 'json',
       success: (function(msg) {
+        $(placeholder).remove();
+        this.getCurrent().show();
         this.getIssues();
       }).bind(this)
     });
   },
-  setStatusOfIssue: function() {
+  moveIssue: function() {
     $.ajax({
       type: "POST",
-      url: '/api/issues/' + this.dragged.dataset.id + '/move',
+      url: '/api/issues/' + this.state.current.id + '/move',
       data: {
         _method:'PUT',
-        issue: { status: this.targetList.dataset.status }
+        issue: { status: this.state.target.status }
       },
       dataType: 'json',
       success: (function(msg) {
-        if(this.over) {
-          this.reorderIssue();
-        } else {
-          this.getIssues();
-        }
+        $(placeholder).remove();
+        this.getCurrent().show();
+        this.getIssues();
       }).bind(this)
     });
   },
   // utility
-  setNodePlacement: function(e) {
-    var relY = e.clientY - this.over.offsetTop;
-    var height = this.over.offsetHeight / 2;
+  getCurrent: function() {
+    return $("[data-id=" + this.state.current.id + "]");
+  },
+  setPlacement: function(e) {
+    var placement;
+    var relY = e.clientY - e.target.offsetTop;
+    var height = e.target.offsetHeight / 2;
     if(relY > height) {
-      this.nodePlacement = "after";
+      e.target.parentNode.insertBefore(placeholder, e.target);
+      placement = "before";
     } else if(relY < height) {
-      this.nodePlacement = "before";
+      e.target.parentNode.insertBefore(placeholder, e.target.nextElementSibling);
+      placement = "after";
     }
+    this.setState({
+      target: {
+        id: e.target.dataset.id,
+        status: e.target.parentNode.dataset.status,
+        priority: e.target.dataset.priority,
+      },
+      placement: placement
+    });
   },
   insertPlaceholder: function(e) {
     if(e.target.tagName == "LI" &&
        !e.target.classList.contains("placeholder")) {
-      this.over = e.target;
-      this.setNodePlacement(e);
-      this.targetList = this.over.parentNode;
-      if(this.nodePlacement == "before") {
-        placeholder.dataset.placement = "before";
-        this.targetList.insertBefore(placeholder, this.over.nextElementSibling);
-      } else {
-        placeholder.dataset.placement = "after";
-        this.targetList.insertBefore(placeholder, this.over);
-      }
+      this.setPlacement(e);
     } else if(e.target.tagName == "UL" &&
               e.target.childNodes.length == 0) {
-      this.over = null;
-      this.targetList = e.target;
       e.target.appendChild(placeholder);
+      this.setState({
+        target: {
+          id: null,
+          status: e.target.dataset.status,
+          priority: null
+        },
+        placement: null
+      });
     }
   },
   // event
   dragStart: function(e) {
-    this.dragged = e.currentTarget;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData("text/html", e.currentTarget);
+    this.setState({
+      current: {
+        id: e.currentTarget.dataset.id,
+        status: e.currentTarget.parentNode.dataset.status,
+        priority: e.currentTarget.dataset.priority
+      }
+    });
   },
   dragEnd: function(e) {
-    var originList = this.dragged.parentNode;
-    this.targetList.removeChild(placeholder);
-
+    // TODO Remove flick on getIssues
     // Update state here
-    if (this.over && this.dragged.dataset.id == this.over.dataset.id) {
-      this.dragged.style.display = "block";
-    } else if (this.targetList != originList) {
-      this.setStatusOfIssue();
-    } else {
+    if (this.state.target.status != this.state.current.status) {
+      this.moveIssue();
+    } else if (this.state.target.id &&
+        this.state.current.id != this.state.target.id) {
       this.reorderIssue();
-      this.dragged.style.display = "block";
+    } else {
+      this.getCurrent().show();
     }
   },
   dragOver: function(e) {
     e.preventDefault();
-    this.dragged.style.display = "none";
+    this.getCurrent().hide();
     this.insertPlaceholder(e);
   },
   componentDidMount: function() {
@@ -119,6 +134,9 @@ var KanbanBox = React.createClass({
           <h3>TODO</h3>
           <IssueList data={this.state.data} status='todo' />
           <IssueForm />
+          <p>placement: {this.state.placement}</p>
+          <p>current: {this.state.current}</p>
+          <p>target: {this.state.target}</p>
         </div>
         <div className="large-4 columns">
           <h3>DOING</h3>
@@ -135,10 +153,9 @@ var KanbanBox = React.createClass({
 var IssueList = React.createClass({
   render: function() {
     var status = this.props.status;
-    var statusFilter = function (issue) {
+    var issueNodes = this.props.data.filter(function (issue) {
       return status == issue.status;
-    };
-    var issueNodes = this.props.data.filter(statusFilter).sort(function(a, b) {
+    }).sort(function(a, b) {
       return a.priority - b.priority;
     }).map((function (issue) {
       return (

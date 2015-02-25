@@ -16,7 +16,6 @@ class Api::IssuesController < ApplicationController
   end
 
   def rotate
-    # TODO: get placement properly
     rotator = Rotator.new(*params.values_at(:current, :target, :placement))
     rotator.issues(params[:status])
     rotator.save
