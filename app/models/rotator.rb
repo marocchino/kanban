@@ -24,7 +24,7 @@ class Rotator
     end
   end
 
-  def issues(status=nil)
+  def issues(status = nil)
     @issues ||= status.nil? ? [] : Issue.status(status).where(priority: range).order(priority: :asc).all
   end
 
@@ -41,8 +41,8 @@ class Rotator
   end
 
   def full?
-    (current > target) && placement == "before" ||
-      (target > current) && placement == "after"
+    (current > target) && placement == 'before' ||
+      (target > current) && placement == 'after'
   end
 
   def rotate_number

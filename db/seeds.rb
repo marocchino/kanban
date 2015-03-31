@@ -6,10 +6,10 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 [
-  "Buy sake",
-  "Bush my teeth",
-  "Read a book",
-  "Translate some docs",
+  'Buy sake',
+  'Bush my teeth',
+  'Read a book',
+  'Translate some docs'
 ].each do |title|
   Issue.create(title: title)
 end
