@@ -5,14 +5,7 @@ Rails.application.routes.draw do
   # You can have the root of your site routed with "root"
   root 'application#index'
   namespace :api do
-    resources :issues do
-      member do
-        put :move
-      end
-      collection do
-        put :rotate
-      end
-    end
+    resources :issues
   end
 
   # Example of regular route:

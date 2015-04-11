@@ -4,22 +4,22 @@ module Api
       render json: Issue.all
     end
 
-    def move
+    def update
       # TODO: should rotate in here
       @issue = Issue.find(params[:id])
       @issue.attributes = issue_params
-      @issue.set_next_priority
-      if @issue.save
-        head :no_content
-      else
-        render json: @issue.errors, status: :unprocessable_entity
+      if @issue.changed.include?("status")
+        @issue.set_next_priority
+        @issue.save
       end
-    end
 
-    def rotate
-      rotator = Rotator.new(*params.values_at(:current, :target, :placement))
-      rotator.issues(params[:status])
-      rotator.save
+      if params[:target_priority]
+        rotator = Rotator.new(@issue.priority,
+                              params[:target_priority],
+                              params[:placement])
+        rotator.issues(@issue.status)
+        rotator.save
+      end
       head :no_content
     end
 

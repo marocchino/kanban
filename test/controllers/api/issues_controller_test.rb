@@ -1,18 +1,20 @@
 require 'test_helper'
 
-class Api::IssuesControllerTest < ActionController::TestCase
-  def test_index
-    get :index
-    hash = JSON.parse(response.body)
-    assert_kind_of Array, hash['issues']
-    assert_response :success
-  end
+module Api
+  class IssuesControllerTest < ActionController::TestCase
+    def test_index
+      get :index
+      hash = JSON.parse(response.body)
+      assert_kind_of Array, hash['issues']
+      assert_response :success
+    end
 
-  def test_move
-    issue = issues(:one)
-    put :move, id: issue.id, issue: { status: 'done' }
-    issue.reload
-    assert_equal issue.status, 'done'
-    assert_response :success
+    def test_update
+      issue = issues(:one)
+      patch :update, id: issue.id, issue: { status: 'done' }
+      issue.reload
+      assert_equal issue.status, 'done'
+      assert_response :success
+    end
   end
 end

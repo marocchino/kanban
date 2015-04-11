@@ -19,32 +19,15 @@ var KanbanBox = React.createClass({
       }.bind(this)
     });
   },
-  reorderIssue: function(){
+  updateIssue: function() {
     $.ajax({
       type: "POST",
-      url: '/api/issues/rotate',
+      url: '/api/issues/' + this.state.current.id,
       data: {
         _method:'PUT',
-        placement: this.state.placement,
-        target:    this.state.target.priority,
-        current:   this.state.current.priority,
-        status:    this.state.target.status
-      },
-      dataType: 'json',
-      success: (function(msg) {
-        $(placeholder).remove();
-        this.getCurrent().show();
-        this.getIssues();
-      }).bind(this)
-    });
-  },
-  moveIssue: function() {
-    $.ajax({
-      type: "POST",
-      url: '/api/issues/' + this.state.current.id + '/move',
-      data: {
-        _method:'PUT',
-        issue: { status: this.state.target.status }
+        issue: { status: this.state.target.status },
+        target_priority: this.state.target.priority,
+        placement: this.state.placement
       },
       dataType: 'json',
       success: (function(msg) {
@@ -71,9 +54,9 @@ var KanbanBox = React.createClass({
     }
     this.setState({
       target: {
-        id: e.target.dataset.id,
-        status: e.target.parentNode.dataset.status,
-        priority: e.target.dataset.priority,
+              id: e.target.dataset.id,
+          status: e.target.parentNode.dataset.status,
+        priority: e.target.dataset.priority
       },
       placement: placement
     });
@@ -102,19 +85,16 @@ var KanbanBox = React.createClass({
     this.setState({
       current: {
         id: e.currentTarget.dataset.id,
-        status: e.currentTarget.parentNode.dataset.status,
-        priority: e.currentTarget.dataset.priority
+        status: e.currentTarget.parentNode.dataset.status
       }
     });
   },
   dragEnd: function(e) {
     // TODO Remove flick on getIssues
     // Update state here
-    if (this.state.target.status != this.state.current.status) {
-      this.moveIssue();
-    } else if (this.state.target.id &&
+    if (this.state.target.state != this.state.current.state ||
         this.state.current.id != this.state.target.id) {
-      this.reorderIssue();
+      this.updateIssue();
     } else {
       this.getCurrent().show();
     }
@@ -135,8 +115,9 @@ var KanbanBox = React.createClass({
           <IssueList data={this.state.data} status='todo' />
           <IssueForm />
           <p>placement: {this.state.placement}</p>
-          <p>current: {this.state.current}</p>
-          <p>target: {this.state.target}</p>
+          <p>current: {this.state.current.id}</p>
+          <p>target: {this.state.target.id}</p>
+          <p>target status: {this.state.target.status}</p>
         </div>
         <div className="large-4 columns">
           <h3>DOING</h3>
