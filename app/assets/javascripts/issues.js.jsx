@@ -112,7 +112,9 @@ var KanbanBox = React.createClass({
       <div className="row">
         <div className="large-4 columns">
           <h3>TODO</h3>
-          <IssueList data={this.state.data} status='todo' />
+          <IssueList
+            data={this.state.data}
+            status='todo' />
           <IssueForm />
           <p>placement: {this.state.placement}</p>
           <p>current: {this.state.current.id}</p>
@@ -121,11 +123,21 @@ var KanbanBox = React.createClass({
         </div>
         <div className="large-4 columns">
           <h3>DOING</h3>
-          <IssueList data={this.state.data} status='doing' />
+          <IssueList
+            data={this.state.data}
+            dragEnd={this.dragEnd}
+            dragStart={this.dragStart}
+            dragOver={this.dragOver}
+            status='doing' />
         </div>
         <div className="large-4 columns">
           <h3>DONE</h3>
-          <IssueList data={this.state.data} status='done' />
+          <IssueList
+            data={this.state.data}
+            dragEnd={this.dragEnd}
+            dragStart={this.dragStart}
+            dragOver={this.dragOver}
+            status='done' />
         </div>
       </div>
     );
@@ -144,8 +156,8 @@ var IssueList = React.createClass({
             data-priority={issue.priority}
             key={issue.id}
             draggable="true"
-            onDragEnd={this._owner.dragEnd}
-            onDragStart={this._owner.dragStart}
+            onDragEnd={this.props.dragEnd}
+            onDragStart={this.props.dragStart}
             className="panel callout radius">
             {issue.priority}. {issue.title}
         </li>
@@ -154,7 +166,7 @@ var IssueList = React.createClass({
     return (
       <ul className="panel issues"
           data-status={status}
-          onDragOver={this._owner.dragOver}>
+          onDragOver={this.props.dragOver}>
         {issueNodes}
       </ul>
     );
@@ -171,7 +183,7 @@ var IssueForm = React.createClass({
   }
 });
 
-React.render(
+ReactDOM.render(
   <KanbanBox url='/api/issues' />,
   document.getElementById('kanban')
 );
