@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Api
   class IssuesController < ApplicationController
     def index
@@ -8,7 +9,7 @@ module Api
       # TODO: should rotate in here
       @issue = Issue.find(params[:id])
       @issue.attributes = issue_params
-      if @issue.changed.include?("status")
+      if @issue.changed.include?('status')
         @issue.set_next_priority
         @issue.save
       end

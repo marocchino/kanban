@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Issue < ActiveRecord::Base
   enum status: { todo: 0, doing: 1, done: 2 }
   validates :priority, uniqueness: { scope: :status }

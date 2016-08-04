@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class Rotator
   attr_reader :current, :target, :placement
   def initialize(current, target, placement)
@@ -25,7 +26,12 @@ class Rotator
   end
 
   def issues(status = nil)
-    @issues ||= status.nil? ? [] : Issue.status(status).where(priority: range).order(priority: :asc).all
+    @issues ||=
+      if status.nil?
+        []
+      else
+        Issue.status(status).where(priority: range).order(priority: :asc).all
+      end
   end
 
   def save
