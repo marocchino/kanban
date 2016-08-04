@@ -1,11 +1,18 @@
-db:
-  image: "postgres:9.4.0"
-  volumes:
-    - ~/.docker-volumes/kanban/db/:/var/lib/postgresql/data/
-  environment:
-    POSTGRES_PASSWORD: ""
-    POSTGRES_USER: "postgres"
-  ports:
-    - "5432:5432"
-  expose:
-    - "5432"
+version: '2'
+services:
+  db:
+    image: "postgres:9.4.0"
+    volumes:
+      - ~/.docker-volumes/kanban/db/:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: ""
+      POSTGRES_USER: "postgres"
+  web:
+    build: .
+    command: /kanban/bin/start
+    volumes:
+      - .:/kanban
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
