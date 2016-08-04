@@ -1,4 +1,4 @@
-FROM ruby:2.2.0
+FROM ruby:2.3.1
 
 # Install Node, postgresql-client
 RUN apt-get update -y && \
