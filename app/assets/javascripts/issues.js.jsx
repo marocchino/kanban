@@ -1,25 +1,36 @@
-var placeholder = document.createElement("li");
-placeholder.className = "placeholder panel";
+let placeholder = document.createElement("li")
+placeholder.className = "placeholder panel callout"
 placeholder.innerText = "Drop here"
 
-var KanbanBox = React.createClass({
-  getInitialState: function() {
-    return {data: [], current: {}, target: {}};
-  },
+class KanbanBox extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {data: [], current: {}, target: {}}
+
+    this.dragStart = this.dragStart.bind(this)
+    this.dragEnd = this.dragEnd.bind(this)
+    this.dragOver = this.dragOver.bind(this)
+  }
+
+  componentDidMount() {
+    this.getIssues()
+  }
+
   // api call
-  getIssues: function() {
+  getIssues() {
     $.ajax({
       url: this.props.url,
       dataType: 'json',
       success: function(res) {
-        this.setState({data: res.data});
+        this.setState({data: res.data})
       }.bind(this),
       error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString());
+        console.error(this.props.url, status, err.toString())
       }.bind(this)
-    });
-  },
-  updateIssue: function() {
+    })
+  }
+
+  updateIssue() {
     $.ajax({
       type: "POST",
       url: '/api/issues/' + this.state.current.id,
@@ -31,26 +42,28 @@ var KanbanBox = React.createClass({
       },
       dataType: 'json',
       success: (function(msg) {
-        $(placeholder).remove();
-        this.getCurrent().show();
-        this.getIssues();
+        $(placeholder).remove()
+        this.getCurrent().show()
+        this.getIssues()
       }).bind(this)
-    });
-  },
+    })
+  }
+
   // utility
-  getCurrent: function() {
-    return $("[data-id=" + this.state.current.id + "]");
-  },
-  setPlacement: function(e) {
-    var placement;
-    var relY = e.clientY - e.target.offsetTop;
-    var height = e.target.offsetHeight / 2;
+  getCurrent() {
+    return $("[data-id=" + this.state.current.id + "]")
+  }
+
+  setPlacement(e) {
+    let placement
+    let relY = e.clientY - e.target.offsetTop
+    let height = e.target.offsetHeight / 2
     if(relY > height) {
-      e.target.parentNode.insertBefore(placeholder, e.target);
-      placement = "before";
+      e.target.parentNode.insertBefore(placeholder, e.target)
+      placement = "before"
     } else if(relY < height) {
-      e.target.parentNode.insertBefore(placeholder, e.target.nextElementSibling);
-      placement = "after";
+      e.target.parentNode.insertBefore(placeholder, e.target.nextElementSibling)
+      placement = "after"
     }
     this.setState({
       target: {
@@ -59,15 +72,16 @@ var KanbanBox = React.createClass({
         priority: e.target.dataset.priority
       },
       placement: placement
-    });
-  },
-  insertPlaceholder: function(e) {
+    })
+  }
+
+  insertPlaceholder(e) {
     if(e.target.tagName == "LI" &&
        !e.target.classList.contains("placeholder")) {
-      this.setPlacement(e);
+      this.setPlacement(e)
     } else if(e.target.tagName == "UL" &&
               e.target.childNodes.length == 0) {
-      e.target.appendChild(placeholder);
+      e.target.appendChild(placeholder)
       this.setState({
         target: {
           id: null,
@@ -75,118 +89,157 @@ var KanbanBox = React.createClass({
           priority: null
         },
         placement: null
-      });
+      })
     }
-  },
+  }
+
   // event
-  dragStart: function(e) {
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData("text/html", e.currentTarget);
+  dragStart(e) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData("text/html", e.currentTarget)
     this.setState({
       current: {
         id: e.currentTarget.dataset.id,
         status: e.currentTarget.parentNode.dataset.status
       }
-    });
-  },
-  dragEnd: function(e) {
+    })
+  }
+
+  dragEnd(e) {
     // TODO Remove flick on getIssues
     // Update state here
     if (this.state.target.state != this.state.current.state ||
         this.state.current.id != this.state.target.id) {
-      this.updateIssue();
+      this.updateIssue()
     } else {
-      this.getCurrent().show();
+      this.getCurrent().show()
     }
-  },
-  dragOver: function(e) {
-    e.preventDefault();
-    this.getCurrent().hide();
-    this.insertPlaceholder(e);
-  },
-  componentDidMount: function() {
-    this.getIssues();
-  },
-  render: function() {
+  }
+
+  dragOver(e) {
+    e.preventDefault()
+    this.getCurrent().hide()
+    this.insertPlaceholder(e)
+  }
+
+  render() {
     return (
-      <div className="row">
-        <div className="large-4 columns">
-          <h3>TODO</h3>
-          <IssueList
-            data={this.state.data}
-            status='todo' />
+      <div>
+        <div className="row">
           <IssueForm />
           <p>placement: {this.state.placement}</p>
           <p>current: {this.state.current.id}</p>
           <p>target: {this.state.target.id}</p>
           <p>target status: {this.state.target.status}</p>
         </div>
-        <div className="large-4 columns">
-          <h3>DOING</h3>
+        <div className="row">
           <IssueList
             data={this.state.data}
             dragEnd={this.dragEnd}
             dragStart={this.dragStart}
             dragOver={this.dragOver}
-            status='doing' />
-        </div>
-        <div className="large-4 columns">
-          <h3>DONE</h3>
+            status='todo'
+          />
           <IssueList
             data={this.state.data}
             dragEnd={this.dragEnd}
             dragStart={this.dragStart}
             dragOver={this.dragOver}
-            status='done' />
+            status='doing'
+          />
+          <IssueList
+            data={this.state.data}
+            dragEnd={this.dragEnd}
+            dragStart={this.dragStart}
+            dragOver={this.dragOver}
+            status='done'
+          />
         </div>
       </div>
-    );
+    )
   }
-});
+}
 
-var IssueList = React.createClass({
-  render: function() {
-    var status = this.props.status;
-    var issueNodes = this.props.data.filter(function (issue) {
-      console.log(issue)
-      console.log(status)
-      return status == issue.attributes.status;
-    }).sort(function(a, b) {
-      return a.priority - b.priority;
-    }).map((function (issue) {
-      return (
-        <li data-id={issue.id}
-            data-priority={issue.attributes.priority}
-            key={issue.id}
-            draggable="true"
-            onDragEnd={this.props.dragEnd}
-            onDragStart={this.props.dragStart}
-            className="panel callout radius">
-            {issue.attributes.priority}. {issue.attributes.title}
-        </li>
-      );
-    }).bind(this));
+KanbanBox.propTypes = {
+  url: React.PropTypes.string.isRequired
+}
+
+class IssueList extends React.Component {
+  _issueNodes(status, data) {
+    return data
+      .filter((issue) => status == issue.attributes.status)
+      .sort((a, b) => a.priority - b.priority)
+  }
+
+  render() {
+    const { status, dragEnd, dragStart, data } = this.props
+    const issueNodes = this._issueNodes(status, data)
     return (
-      <ul className="panel issues"
+      <div className="large-4 columns">
+        <h3>{status}</h3>
+        <ul
+          className="panel issues"
           data-status={status}
           onDragOver={this.props.dragOver}>
-        {issueNodes}
-      </ul>
-    );
+          {issueNodes.map((issue) => (
+            <IssueItem
+              id={issue.id}
+              key={issue.id}
+              priority={issue.attributes.priority}
+              title={issue.attributes.title}
+              dragEnd={dragEnd}
+              dragStart={dragStart}
+            />
+          ))}
+        </ul>
+      </div>
+    )
   }
-});
+}
+IssueList.propTypes = {
+  data: React.PropTypes.array.isRequired,
+  dragEnd: React.PropTypes.func.isRequired,
+  dragOver: React.PropTypes.func.isRequired,
+  dragStart: React.PropTypes.func.isRequired,
+  status: React.PropTypes.string.isRequired
+}
 
-var IssueForm = React.createClass({
-  render: function() {
+class IssueItem extends React.Component {
+  render() {
+    return (
+      <li
+        data-id={this.props.id}
+        data-priority={this.props.priority}
+        draggable="true"
+        onDragEnd={this.props.dragEnd}
+        onDragStart={this.props.dragStart}
+        className="panel callout radius">
+        {this.props.priority}. {this.props.title}
+      </li>
+    )
+  }
+}
+
+IssueItem.propTypes = {
+  id: React.PropTypes.number.isRequired,
+  key: React.PropTypes.number.isRequired,
+  priority: React.PropTypes.number.isRequired,
+  title: React.PropTypes.string.isRequired,
+  dragEnd: React.PropTypes.func.isRequired,
+  dragStart: React.PropTypes.func.isRequired
+}
+
+class IssueForm extends React.Component {
+  render() {
     return (
       <div className="issueForm">
         Hello! I am a IssueForm.
       </div>
-    );
+    )
   }
-});
+}
 
 ReactDOM.render(
   <KanbanBox url='/api/issues' />,
   document.getElementById('kanban')
-);
+)
