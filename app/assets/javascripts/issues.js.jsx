@@ -5,7 +5,7 @@ placeholder.innerText = "Drop here"
 class KanbanBox extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {data: [], current: {}, target: {}}
+    this.state = {data: [], currentId: 0, target: {}}
 
     this.dragStart = this.dragStart.bind(this)
     this.dragEnd = this.dragEnd.bind(this)
@@ -18,40 +18,35 @@ class KanbanBox extends React.Component {
 
   // api call
   getIssues() {
+    const url = this.props.url
     $.ajax({
-      url: this.props.url,
+      url,
       dataType: 'json',
-      success: function(res) {
+      success: (res) => {
         this.setState({data: res.data})
-      }.bind(this),
-      error: function(xhr, status, err) {
-        console.error(this.props.url, status, err.toString())
-      }.bind(this)
+      },
+      error: (xhr, status, err) => {
+        console.error(url, status, err.toString())
+      }
     })
   }
 
   updateIssue() {
     $.ajax({
       type: "POST",
-      url: '/api/issues/' + this.state.current.id,
+      url: `/api/issues/${this.state.currentId}`,
       data: {
         _method:'PUT',
         issue: { status: this.state.target.status },
-        target_priority: this.state.target.priority,
+        target_priority: +this.state.target.priority,
         placement: this.state.placement
       },
       dataType: 'json',
-      success: (function(msg) {
-        $(placeholder).remove()
-        this.getCurrent().show()
+      success: (msg) => {
         this.getIssues()
-      }).bind(this)
+        this.setState({ currentId: 0 })
+      }
     })
-  }
-
-  // utility
-  getCurrent() {
-    return $("[data-id=" + this.state.current.id + "]")
   }
 
   setPlacement(e) {
@@ -79,13 +74,16 @@ class KanbanBox extends React.Component {
     if(e.target.tagName == "LI" &&
        !e.target.classList.contains("placeholder")) {
       this.setPlacement(e)
-    } else if(e.target.tagName == "UL" &&
-              e.target.childNodes.length == 0) {
-      e.target.appendChild(placeholder)
+    } else {
+      const ul = e.target.querySelector('ul')
+      if (!ul) {
+        return
+      }
+      ul.appendChild(placeholder)
       this.setState({
         target: {
           id: null,
-          status: e.target.dataset.status,
+          status: ul.dataset.status,
           priority: null
         },
         placement: null
@@ -97,28 +95,20 @@ class KanbanBox extends React.Component {
   dragStart(e) {
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData("text/html", e.currentTarget)
-    this.setState({
-      current: {
-        id: e.currentTarget.dataset.id,
-        status: e.currentTarget.parentNode.dataset.status
-      }
-    })
+    this.setState({ currentId: +e.currentTarget.dataset.id })
   }
 
   dragEnd(e) {
     // TODO Remove flick on getIssues
     // Update state here
-    if (this.state.target.state != this.state.current.state ||
-        this.state.current.id != this.state.target.id) {
+    $(placeholder).remove()
+    if (this.state.currentId !== this.state.target.id) {
       this.updateIssue()
-    } else {
-      this.getCurrent().show()
     }
   }
 
   dragOver(e) {
     e.preventDefault()
-    this.getCurrent().hide()
     this.insertPlaceholder(e)
   }
 
@@ -128,13 +118,14 @@ class KanbanBox extends React.Component {
         <div className="row">
           <IssueForm />
           <p>placement: {this.state.placement}</p>
-          <p>current: {this.state.current.id}</p>
+          <p>currentId: {this.state.currentId}</p>
           <p>target: {this.state.target.id}</p>
           <p>target status: {this.state.target.status}</p>
         </div>
         <div className="row">
           <IssueList
             data={this.state.data}
+            currentId={this.state.currentId}
             dragEnd={this.dragEnd}
             dragStart={this.dragStart}
             dragOver={this.dragOver}
@@ -142,6 +133,7 @@ class KanbanBox extends React.Component {
           />
           <IssueList
             data={this.state.data}
+            currentId={this.state.currentId}
             dragEnd={this.dragEnd}
             dragStart={this.dragStart}
             dragOver={this.dragOver}
@@ -149,6 +141,7 @@ class KanbanBox extends React.Component {
           />
           <IssueList
             data={this.state.data}
+            currentId={this.state.currentId}
             dragEnd={this.dragEnd}
             dragStart={this.dragStart}
             dragOver={this.dragOver}
@@ -166,25 +159,25 @@ KanbanBox.propTypes = {
 
 class IssueList extends React.Component {
   _issueNodes(status, data) {
-    return data
-      .filter((issue) => status == issue.attributes.status)
-      .sort((a, b) => a.priority - b.priority)
+    return data.filter((issue) => status === issue.attributes.status)
   }
 
   render() {
-    const { status, dragEnd, dragStart, data } = this.props
+    const { status, dragEnd, dragStart, dragOver, data, currentId } = this.props
     const issueNodes = this._issueNodes(status, data)
     return (
-      <div className="large-4 columns">
+      <div
+        className="large-4 columns"
+        onDragOver={dragOver}>
         <h3>{status}</h3>
         <ul
           className="panel issues"
-          data-status={status}
-          onDragOver={this.props.dragOver}>
+          data-status={status}>
           {issueNodes.map((issue) => (
             <IssueItem
-              id={issue.id}
-              key={issue.id}
+              id={+issue.id}
+              currentId={currentId}
+              key={+issue.id}
               priority={issue.attributes.priority}
               title={issue.attributes.title}
               dragEnd={dragEnd}
@@ -198,6 +191,7 @@ class IssueList extends React.Component {
 }
 IssueList.propTypes = {
   data: React.PropTypes.array.isRequired,
+  currentId: React.PropTypes.number,
   dragEnd: React.PropTypes.func.isRequired,
   dragOver: React.PropTypes.func.isRequired,
   dragStart: React.PropTypes.func.isRequired,
@@ -206,15 +200,17 @@ IssueList.propTypes = {
 
 class IssueItem extends React.Component {
   render() {
+    const { id, currentId, title, priority, dragStart, dragEnd } = this.props
+    const className = "panel callout radius"
     return (
       <li
-        data-id={this.props.id}
-        data-priority={this.props.priority}
+        data-id={id}
         draggable="true"
-        onDragEnd={this.props.dragEnd}
-        onDragStart={this.props.dragStart}
-        className="panel callout radius">
-        {this.props.priority}. {this.props.title}
+        data-priority={priority}
+        onDragEnd={dragEnd}
+        onDragStart={dragStart}
+        className={className}>
+        {id}. {title}. ({priority})
       </li>
     )
   }
@@ -222,6 +218,7 @@ class IssueItem extends React.Component {
 
 IssueItem.propTypes = {
   id: React.PropTypes.number.isRequired,
+  currentId: React.PropTypes.number,
   key: React.PropTypes.number.isRequired,
   priority: React.PropTypes.number.isRequired,
   title: React.PropTypes.string.isRequired,

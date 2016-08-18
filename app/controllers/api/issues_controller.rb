@@ -2,7 +2,7 @@
 module Api
   class IssuesController < ApplicationController
     def index
-      render json: Issue.all
+      render json: Issue.order(:priority)
     end
 
     def update
@@ -12,9 +12,7 @@ module Api
       if @issue.changed.include?('status')
         @issue.set_next_priority
         @issue.save
-      end
-
-      if params[:target_priority]
+      elsif params[:target_priority]
         rotator = Rotator.new(@issue.priority,
                               params[:target_priority],
                               params[:placement])
