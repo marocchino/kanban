@@ -6,7 +6,7 @@ module Api
     def test_index
       get :index
       hash = JSON.parse(response.body)
-      assert_kind_of Array, hash['issues']
+      assert_kind_of Array, hash['data']
       assert_response :success
     end
 

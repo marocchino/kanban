@@ -2,6 +2,8 @@ version: '2'
 services:
   db:
     image: "postgres:9.4.0"
+    ports:
+      - "5432:5432"
     volumes:
       - ~/.docker-volumes/kanban/db/:/var/lib/postgresql/data/
     environment:

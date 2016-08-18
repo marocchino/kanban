@@ -11,8 +11,8 @@ var KanbanBox = React.createClass({
     $.ajax({
       url: this.props.url,
       dataType: 'json',
-      success: function(data) {
-        this.setState({data: data.issues});
+      success: function(res) {
+        this.setState({data: res.data});
       }.bind(this),
       error: function(xhr, status, err) {
         console.error(this.props.url, status, err.toString());
@@ -143,23 +143,26 @@ var KanbanBox = React.createClass({
     );
   }
 });
+
 var IssueList = React.createClass({
   render: function() {
     var status = this.props.status;
     var issueNodes = this.props.data.filter(function (issue) {
-      return status == issue.status;
+      console.log(issue)
+      console.log(status)
+      return status == issue.attributes.status;
     }).sort(function(a, b) {
       return a.priority - b.priority;
     }).map((function (issue) {
       return (
         <li data-id={issue.id}
-            data-priority={issue.priority}
+            data-priority={issue.attributes.priority}
             key={issue.id}
             draggable="true"
             onDragEnd={this.props.dragEnd}
             onDragStart={this.props.dragStart}
             className="panel callout radius">
-            {issue.priority}. {issue.title}
+            {issue.attributes.priority}. {issue.attributes.title}
         </li>
       );
     }).bind(this));
