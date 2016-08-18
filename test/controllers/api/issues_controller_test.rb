@@ -10,11 +10,23 @@ module Api
       assert_response :success
     end
 
-    def test_update
+    def test_update_without_target
       issue = issues(:one)
-      patch :update, id: issue.id, issue: { status: 'done' }
+      put :update, id: issue.id, status: 'done'
       issue.reload
-      assert_equal issue.status, 'done'
+      assert_equal 'done', issue.status
+      assert_response :success
+    end
+
+    def test_update_with_target
+      issue = issues(:one)
+      put :update,
+          id: issue.id,
+          status: 'done',
+          target_priority: '1',
+          placement: 'after'
+      issue.reload
+      assert_equal 'done', issue.status
       assert_response :success
     end
   end

@@ -5,7 +5,12 @@ placeholder.innerText = "Drop here"
 class KanbanBox extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {data: [], currentId: 0, target: {}}
+    this.state = {
+      data: [],
+      currentId: 0,
+      placement: null,
+      target: {}
+    }
 
     this.dragStart = this.dragStart.bind(this)
     this.dragEnd = this.dragEnd.bind(this)
@@ -38,7 +43,7 @@ class KanbanBox extends React.Component {
       data: {
         _method:'PUT',
         status: this.state.target.status,
-        target_priority: +this.state.target.priority,
+        target_priority: this.state.target.priority,
         placement: this.state.placement
       },
       dataType: 'json',
@@ -62,9 +67,9 @@ class KanbanBox extends React.Component {
     }
     this.setState({
       target: {
-              id: e.target.dataset.id,
+              id: +e.target.dataset.id,
           status: e.target.parentNode.dataset.status,
-        priority: e.target.dataset.priority
+        priority: +e.target.dataset.priority
       },
       placement: placement
     })
