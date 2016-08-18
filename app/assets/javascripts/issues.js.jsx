@@ -37,7 +37,7 @@ class KanbanBox extends React.Component {
       url: `/api/issues/${this.state.currentId}`,
       data: {
         _method:'PUT',
-        issue: { status: this.state.target.status },
+        status: this.state.target.status,
         target_priority: +this.state.target.priority,
         placement: this.state.placement
       },

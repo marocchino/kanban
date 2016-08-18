@@ -1,57 +1,64 @@
 # frozen_string_literal: true
 class Rotator
-  attr_reader :current, :target, :placement
-  def initialize(current, target, placement)
-    @current = current.to_i
+  attr_reader :current, :target, :placement, :status
+
+  def self.rotate(issue, params)
+    target_priority, placement, status =
+      params.values_at(:target_priority, :placement, :status)
+    issue.status = status
+    issue.set_next_priority! if issue.changed.include?('status')
+    new(issue, target_priority, placement).save if target_priority
+  end
+
+  def initialize(issue, target, placement)
+    @current = issue.priority
+    @status = issue.status
     @target = target.to_i
     @placement = placement
   end
 
-  def array
-    if @issues.blank?
-      range.to_a
-    else
-      @issues.map(&:priority)
-    end
-  end
-
-  def rotate
-    if full?
-      array.rotate(rotate_number)
-    elsif current > target
-      [target] + array[1, array.size - 1].rotate(rotate_number)
-    elsif target > current
-      array[0, array.size - 1].rotate(rotate_number) + [target]
-    end
-  end
-
-  def issues(status = nil)
-    @issues ||=
-      if status.nil?
-        []
-      else
-        Issue.status(status).where(priority: range).order(priority: :asc).all
+  def rotated_priorities
+    return priorities if expect == current
+    priorities.map do |i|
+      case i
+      when current then expect
+      when range   then current > expect ? i + 1 : i - 1
+      else i
       end
+    end
   end
 
   def save
-    @issues.zip(rotate).all? do |issue, priority|
+    return true if issues.count < 2 || rotated_priorities == priorities
+    issues.zip(rotated_priorities).all? do |issue, priority|
       issue.update_attribute(:priority, priority)
     end
   end
 
   private
 
+  def priorities
+    [*1..issues.size]
+  end
+
+  def issues
+    @issues ||= Issue.ordered_status(status)
+  end
+
+  def expect
+    return current > target ? target : target - 1 if before?
+    current < target ? target : target + 1
+  end
+
+  def before?
+    placement == 'before'
+  end
+
+  def after?
+    placement == 'after'
+  end
+
   def range
-    current > target ? target..current : current..target
-  end
-
-  def full?
-    (current > target) && placement == 'before' ||
-      (target > current) && placement == 'after'
-  end
-
-  def rotate_number
-    (current > target) ? 1 : -1
+    current > expect ? expect..current : current..expect
   end
 end
