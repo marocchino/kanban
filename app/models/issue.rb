@@ -13,6 +13,6 @@ class Issue < ApplicationRecord
 
   def set_next_priority!
     set_next_priority
-    save
+    save!
   end
 end

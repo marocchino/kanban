@@ -2,39 +2,25 @@
 require 'test_helper'
 
 class IssueTest < ActiveSupport::TestCase
-  def issue
-    @issue ||= Issue.new
-  end
-
-  def test_create
-    assert Issue.create(title: 'test')
+  def setup
+    @one = issues(:one)
+    @issue = Issue.new(status: @one.status)
   end
 
   def test_invalid_same_priority_in_same_category
-    one = issues(:one)
-    issue = Issue.new
-    issue.priority = one.priority
-    issue.status = one.status
-    assert !issue.valid?
+    @issue.priority = @one.priority
+    refute @issue.valid?
 
-    issue.priority += 1
-    assert issue.valid?
+    @issue.priority += 1
+    assert @issue.valid?
   end
 
-  def test_todo_status
-    assert issue.todo?
-    assert_equal 'todo', issue.status
-  end
-
-  def test_doing_status
-    issue = issues(:two)
-    assert issue.doing?
-    assert_equal 'doing', issue.status
-  end
-
-  def test_done_status
-    issue = issues(:three)
-    assert issue.done?
-    assert_equal 'done', issue.status
+  def test_set_next_priority
+    @issue.status = @one.status
+    assert_kind_of Issue, @issue.set_next_priority
+    assert_equal @one.priority + 1, @issue.priority
+    @one.destroy
+    @issue.set_next_priority
+    assert_equal 1, @issue.priority
   end
 end
